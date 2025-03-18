@@ -5,6 +5,7 @@ import Image from 'next/image';
 
 const PrizeDisplay: React.FC = () => {
   const [isGlitching, setIsGlitching] = useState(false);
+  const prizeAmount = 15000; // Store as a number
   
   useEffect(() => {
     // Create a random glitch effect every few seconds
@@ -15,6 +16,13 @@ const PrizeDisplay: React.FC = () => {
     
     return () => clearInterval(glitchInterval);
   }, []);
+
+  // Format the prize amount with commas
+  const formattedPrize = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0
+  }).format(prizeAmount);
 
   return (
     <div className="relative flex flex-col items-center justify-center p-6 backdrop-blur-sm rounded-xl border border-[#00ff00]/30 bg-black/50 shadow-[0_0_15px_rgba(0,255,0,0.3)]">
@@ -30,7 +38,7 @@ const PrizeDisplay: React.FC = () => {
       </div>
       
       <div className={`text-5xl font-bold text-white font-mono transition-all duration-100 ${isGlitching ? 'skew-x-3 text-[#ff00ff]' : ''}`}>
-        $15,000
+        {formattedPrize}
       </div>
       
       <p className="mt-4 text-[#00ff00]/80 text-center max-w-xs">

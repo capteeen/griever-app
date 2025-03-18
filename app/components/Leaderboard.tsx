@@ -72,10 +72,6 @@ const Leaderboard: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
   
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString();
-  };
-  
   if (isLoading) {
     return (
       <div className="bg-black/70 backdrop-blur-md border border-[#00ff00]/30 rounded-lg p-6 w-full">
@@ -161,7 +157,7 @@ const Leaderboard: React.FC = () => {
                   {entry.username || 'Anonymous User'}
                 </div>
                 <div className="col-span-4 text-white/70 text-xs italic overflow-hidden text-ellipsis whitespace-nowrap" title={entry.storyExcerpt}>
-                  "{entry.storyExcerpt || 'No story excerpt available'}..."
+                  &quot;{entry.storyExcerpt || 'No story excerpt available'}&quot;...
                 </div>
                 <div className="col-span-2 text-center">
                   <span className="font-mono text-white">

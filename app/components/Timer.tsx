@@ -4,55 +4,44 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface TimerProps {
-  duration: number; // Duration in seconds
-  onExpire: () => void;
-  isActive?: boolean;
+  initialSeconds: number;
+  onComplete?: () => void;
 }
 
-const Timer: React.FC<TimerProps> = ({ 
-  duration = 180, // 3 minutes default
-  onExpire,
-  isActive = true
-}) => {
-  const [timeLeft, setTimeLeft] = useState(duration);
+const Timer: React.FC<TimerProps> = ({ initialSeconds, onComplete }) => {
+  const [remainingSeconds, setRemainingSeconds] = useState(initialSeconds);
+  const [isRunning, setIsRunning] = useState(true);
   const [isWarning, setIsWarning] = useState(false);
   
   useEffect(() => {
-    if (!isActive) return;
-    
-    // Calculate minutes and seconds for display
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    
-    // Set warning state when less than 30 seconds remain
-    if (timeLeft <= 30 && !isWarning) {
-      setIsWarning(true);
-    }
-    
-    // Handle timer expiration
-    if (timeLeft === 0) {
-      onExpire();
+    if (!isRunning || remainingSeconds <= 0) {
+      if (remainingSeconds <= 0 && onComplete) {
+        onComplete();
+      }
       return;
     }
     
-    // Set up countdown interval
-    const intervalId = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+    // Set warning state when less than 30 seconds remain
+    if (remainingSeconds <= 30 && !isWarning) {
+      setIsWarning(true);
+    }
+    
+    const timerId = setTimeout(() => {
+      setRemainingSeconds(seconds => Math.max(0, seconds - 1));
     }, 1000);
     
-    // Clean up interval on unmount or when timer stops
-    return () => clearInterval(intervalId);
-  }, [timeLeft, isActive, onExpire, isWarning]);
+    return () => clearTimeout(timerId);
+  }, [remainingSeconds, isRunning, onComplete, isWarning]);
   
-  // Format time for display
+  // Format time as mm:ss
   const formatTime = () => {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    const mins = Math.floor(remainingSeconds / 60);
+    const secs = remainingSeconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
   
   // Calculate progress percentage
-  const progressPercent = (timeLeft / duration) * 100;
+  const progressPercent = (remainingSeconds / initialSeconds) * 100;
   
   return (
     <div className="relative">
@@ -60,7 +49,7 @@ const Timer: React.FC<TimerProps> = ({
         className={`font-mono text-lg font-bold p-2 rounded-md ${
           isWarning ? 'text-red-500' : 'text-[#00ff00]'
         }`}
-        animate={{ scale: isWarning && timeLeft % 2 === 0 ? 1.1 : 1 }}
+        animate={{ scale: isWarning && remainingSeconds % 2 === 0 ? 1.1 : 1 }}
         transition={{ duration: 0.3 }}
       >
         {formatTime()}

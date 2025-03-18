@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import TextToSpeech from './TextToSpeech';
 import AutoPlayingTextToSpeech from './AutoPlayingTextToSpeech';
 
 export interface Message {
@@ -12,13 +11,11 @@ export interface Message {
 
 interface ChatMessageProps {
   message: Message;
-  isLatest: boolean;
   onSpeakingChange?: (speaking: boolean) => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ 
   message, 
-  isLatest,
   onSpeakingChange 
 }) => {
   const isAI = message.role === 'assistant';

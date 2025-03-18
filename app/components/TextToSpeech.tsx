@@ -182,12 +182,13 @@ const TextToSpeech: React.FC<TextToSpeechProps> = ({
     
     // Cleanup on unmount
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+        audio.src = '';
       }
     };
-  }, [text, autoPlay]);
+  }, [text, autoPlay, autoplayAttempted, generateSpeech]);
 
   return (
     <div className="flex items-center space-x-2 my-2">

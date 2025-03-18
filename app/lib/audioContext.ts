@@ -3,6 +3,10 @@
 // This file provides a utility to initialize and unlock the audio context
 // for browsers that require user interaction before allowing audio playback
 
+interface WindowWithWebkitAudioContext extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
 let audioContextInstance: AudioContext | null = null;
 
 export function getAudioContext(): AudioContext | null {
@@ -10,7 +14,8 @@ export function getAudioContext(): AudioContext | null {
     return null; // We're on the server side
   }
   
-  const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+  const windowWithWebkit = window as WindowWithWebkitAudioContext;
+  const AudioContextClass = window.AudioContext || windowWithWebkit.webkitAudioContext;
   
   if (!AudioContextClass) {
     console.warn('AudioContext is not supported in this browser');

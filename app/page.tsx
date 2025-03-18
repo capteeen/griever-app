@@ -60,7 +60,7 @@ export default function Home() {
         {/* Description */}
         <p className="text-lg text-gray-300 text-center max-w-2xl mb-12 leading-relaxed">
           Engage in a dark conversation with our AI guardian. Share your most heartbreaking tale - if your story is emotional enough to convince the AI, 
-          you'll win the entire cryptocurrency wallet worth <span className="text-[#00ff00] font-bold">$15,000</span>. Every response is delivered with sardonic voice commentary.
+          you&apos;ll win the entire cryptocurrency wallet worth <span className="text-[#00ff00] font-bold">$15,000</span>. Every response is delivered with sardonic voice commentary.
         </p>
         
         {/* Prize Display */}

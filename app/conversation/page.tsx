@@ -216,7 +216,7 @@ export default function ConversationPage() {
           setRating(storyRating);
           
           // Save to leaderboard API
-          const leaderboardResponse = await fetch('/api/leaderboard', {
+          const leaderboardResult = await fetch('/api/leaderboard', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -224,9 +224,13 @@ export default function ConversationPage() {
             body: JSON.stringify(storyRating),
           });
           
+          if (leaderboardResult.ok) {
+            console.log('Rating saved to leaderboard successfully');
+          }
+          
           // Update session with completed status and rating
           if (sessionId) {
-            const sessionResponse = await fetch('/api/session', {
+            const sessionResult = await fetch('/api/session', {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
@@ -238,6 +242,10 @@ export default function ConversationPage() {
                 rating: storyRating,
               }),
             });
+            
+            if (sessionResult.ok) {
+              console.log('Session updated successfully');
+            }
           }
           
           // Add final AI message with rating results
@@ -285,6 +293,30 @@ export default function ConversationPage() {
     router.push('/?showLeaderboard=true');
   };
   
+  // Submit rating to leaderboard
+  const submitToLeaderboard = async (rating: StoryRatingType) => {
+    try {
+      const response = await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rating),
+      });
+      
+      if (response.ok) {
+        console.log('Rating submitted to leaderboard successfully');
+      } else {
+        console.error('Failed to submit to leaderboard');
+      }
+      
+      return response.ok;
+    } catch (error) {
+      console.error('Error submitting to leaderboard:', error);
+      return false;
+    }
+  };
+  
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Matrix rain background */}
@@ -308,9 +340,8 @@ export default function ConversationPage() {
             {!sessionEnded && (
               <div className="bg-black/50 px-3 py-1 rounded-md border border-[#00ff00]/30">
                 <Timer 
-                  duration={180} // 3 minutes in seconds
-                  onExpire={handleTimerExpire}
-                  isActive={timerActive}
+                  initialSeconds={180} // 3 minutes in seconds
+                  onComplete={handleTimerExpire}
                 />
               </div>
             )}
@@ -361,7 +392,6 @@ export default function ConversationPage() {
               <ChatMessage 
                 key={index} 
                 message={message} 
-                isLatest={index === messages.length - 1 && message.role === 'assistant'} 
                 onSpeakingChange={handleSpeakingChange}
               />
             ))}

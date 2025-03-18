@@ -6,8 +6,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Fallback data for when Supabase is not configured
-let fallbackLeaderboard: LeaderboardEntry[] = [];
-let fallbackSessions: UserSession[] = [];
+const fallbackLeaderboard: LeaderboardEntry[] = [];
+const fallbackSessions: UserSession[] = [];
 
 const hasSupabaseCredentials = supabaseUrl && supabaseKey && supabaseUrl.length > 0 && supabaseKey.length > 0;
 

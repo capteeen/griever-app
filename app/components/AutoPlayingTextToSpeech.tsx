@@ -89,9 +89,11 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
     
     // Clean up on component unmount or when text changes
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
+      // Capture the current value of audioRef to avoid React Hook warning
+      const audioElement = audioRef.current;
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.src = '';
       }
     };
   }, [text]);

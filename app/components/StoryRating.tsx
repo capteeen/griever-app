@@ -78,6 +78,14 @@ const StoryRating: React.FC<StoryRatingProps> = ({ rating }) => {
           </span>
         </div>
       </div>
+
+      {/* Worthy percentage visualization */}
+      <div className="mt-6 mb-2 text-center">
+        <h3 className="text-lg font-bold mb-2">AI Guardian&apos;s verdict:</h3>
+        <p className="text-md mb-4">{rating.worthy === 'YES' ? 
+          'Your story was deemed worthy of the competition.' : 
+          'Your story was not considered &quot;worthy&quot; of entering the final competition.'}</p>
+      </div>
     </motion.div>
   );
 };

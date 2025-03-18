@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getLeaderboard, addLeaderboardEntry } from '../../lib/supabase';
-import { LeaderboardEntry } from '../../lib/types';
+import { StoryRating } from '../../lib/types';
 
 // Add a new entry to the leaderboard
 export async function POST(request: NextRequest) {
   try {
-    const entry = await request.json();
+    const entry: StoryRating = await request.json();
     
-    // Ensure required fields
-    if (!entry.userId || !entry.username || entry.authenticity === undefined || entry.emotionalImpact === undefined) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    // Validate entry
+    if (!entry || !entry.userId || !entry.username || !entry.storyExcerpt) {
+      return NextResponse.json(
+        { error: 'Invalid entry data' },
+        { status: 400 }
+      );
     }
     
     // Add timestamp if not provided
@@ -20,14 +23,24 @@ export async function POST(request: NextRequest) {
     // Store entry using Supabase utility (will fallback to in-memory if no Supabase)
     const success = await addLeaderboardEntry(entry);
     
-    if (!success) {
+    if (success) {
+      return NextResponse.json(
+        { success: true },
+        { status: 201 }
+      );
+    } else {
       console.warn('Failed to add entry to leaderboard, but continuing with fallback');
+      return NextResponse.json(
+        { error: 'Failed to add entry' },
+        { status: 500 }
+      );
     }
-    
-    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
     console.error('Error adding leaderboard entry:', error);
-    return NextResponse.json({ error: 'Failed to add leaderboard entry' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to process request' },
+      { status: 500 }
+    );
   }
 }
 
