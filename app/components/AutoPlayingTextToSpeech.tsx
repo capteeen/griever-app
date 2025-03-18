@@ -62,15 +62,19 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
           throw new Error(errorData.message || `Failed to generate speech: ${response.status}`);
         }
         
-        const data = await response.json();
+        // Get the audio blob directly from the response
+        const audioBlob = await response.blob();
         
-        if (!data.audioUrl) {
-          throw new Error('No audio URL returned from API');
+        if (!audioBlob || audioBlob.size === 0) {
+          throw new Error('Empty audio response received');
         }
         
+        // Create an object URL from the blob
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
         if (audioRef.current) {
-          // Set the audio source
-          audioRef.current.src = data.audioUrl;
+          // Set the audio source to the blob URL
+          audioRef.current.src = audioUrl;
           
           // Ensure audio element is set up for autoplay
           audioRef.current.autoplay = true;
@@ -106,7 +110,13 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
     generateAndPlaySpeech();
     
     // Clean up on component unmount or when text changes
-    return cleanupAudio;
+    return () => {
+      cleanupAudio();
+      // Revoke any object URLs we created to prevent memory leaks
+      if (audioRef.current?.src && audioRef.current.src.startsWith('blob:')) {
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+    };
   }, [text, cleanupAudio]);
   
   // Handle play button click

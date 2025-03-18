@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import crypto from 'crypto';
-import fs from 'fs';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -21,30 +17,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate a unique filename
-    const hash = crypto.createHash('md5').update(text).digest('hex');
-    const filename = `${hash}.mp3`;
-    const publicDir = path.join(process.cwd(), 'public', 'audio');
-    const filePath = path.join(publicDir, filename);
-    const publicPath = `/audio/${filename}`;
-
     try {
-      // Create directory if it doesn't exist
-      if (!fs.existsSync(publicDir)) {
-        await mkdir(publicDir, { recursive: true });
-        console.log(`Created directory: ${publicDir}`);
-      }
-
-      // Check if file already exists to avoid regenerating
-      if (fs.existsSync(filePath)) {
-        console.log(`Audio file already exists: ${filePath}`);
-        return NextResponse.json({
-          audioUrl: publicPath,
-        });
-      }
-
-      // Try to generate the speech using OpenAI's TTS API
       console.log(`Generating speech with OpenAI for text: ${text.substring(0, 50)}...`);
+      
+      // Try to generate the speech using OpenAI's TTS API
       const mp3 = await openai.audio.speech.create({
         model: "tts-1",
         voice: "onyx",  // Using 'onyx' for a deeper, more menacing voice
@@ -54,14 +30,19 @@ export async function POST(req: Request) {
 
       // Convert the response to a Buffer
       const buffer = Buffer.from(await mp3.arrayBuffer());
+      
+      // Return the audio data directly as base64
+      const base64Audio = buffer.toString('base64');
+      console.log('Successfully generated speech audio');
 
-      // Write the file
-      await writeFile(filePath, buffer);
-      console.log(`Successfully wrote audio file: ${filePath}`);
-
-      // Return the public URL to the generated audio file
-      return NextResponse.json({
-        audioUrl: publicPath,
+      // Return the base64 audio data
+      return new NextResponse(buffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'audio/mpeg',
+          'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
+          'Content-Disposition': 'inline'
+        }
       });
     } catch (error: any) {
       console.error('Error generating speech with OpenAI:', error);
