@@ -15,6 +15,7 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   
@@ -39,6 +40,7 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
   useEffect(() => {
     if (!text) return;
     
+    setErrorMessage(null);
     const generateAndPlaySpeech = async () => {
       try {
         setIsLoading(true);
@@ -56,10 +58,15 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
         });
         
         if (!response.ok) {
-          throw new Error('Failed to generate speech');
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.message || `Failed to generate speech: ${response.status}`);
         }
         
         const data = await response.json();
+        
+        if (!data.audioUrl) {
+          throw new Error('No audio URL returned from API');
+        }
         
         if (audioRef.current) {
           // Set the audio source
@@ -91,6 +98,7 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
         setIsLoading(false);
       } catch (error) {
         console.error('Error generating speech:', error);
+        setErrorMessage(error instanceof Error ? error.message : 'Failed to generate speech');
         setIsLoading(false);
       }
     };
@@ -114,6 +122,7 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
       unlockAudioContext();
       audioRef.current.play().catch(err => {
         console.warn('Play failed:', err);
+        setErrorMessage('Failed to play audio: ' + (err instanceof Error ? err.message : 'Unknown error'));
       });
     }
   };
@@ -169,7 +178,9 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
       )}
       
       <span className="text-xs text-[#00ff00]/70">
-        {isLoading ? 'Generating voice...' : isPlaying ? (isPaused ? 'Paused' : 'Speaking...') : 'AI Voice'}
+        {isLoading ? 'Generating voice...' : errorMessage ? 
+          <span className="text-red-400">{errorMessage}</span> : 
+          isPlaying ? (isPaused ? 'Paused' : 'Speaking...') : 'AI Voice'}
       </span>
       
       {/* The actual audio element */}
@@ -178,6 +189,7 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
         onPlay={() => {
           setIsPlaying(true);
           setIsPaused(false);
+          setErrorMessage(null);
         }}
         onPause={() => {
           setIsPaused(true);
@@ -186,8 +198,10 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
           setIsPlaying(false);
           setIsPaused(false);
         }}
-        onError={() => {
-          console.error('Audio error');
+        onError={(e) => {
+          const error = e.currentTarget.error;
+          console.error('Audio error', error);
+          setErrorMessage(`Audio error: ${error?.message || 'Unknown error'}`);
           setIsPlaying(false);
           setIsPaused(false);
           setIsLoading(false);

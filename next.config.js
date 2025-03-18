@@ -11,6 +11,8 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  // Output configuration for deployments
+  output: 'standalone',
   // Other Next.js config options
   images: {
     domains: [],
