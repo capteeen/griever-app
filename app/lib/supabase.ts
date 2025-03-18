@@ -78,7 +78,7 @@ export async function addLeaderboardEntry(entry: StoryRating): Promise<boolean> 
       return true;
     }
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('leaderboard')
       .select('*')
       .eq('userId', entry.userId)

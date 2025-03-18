@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { unlockAudioContext } from '../lib/audioContext';
 
 interface TextToSpeechProps {
@@ -28,8 +28,8 @@ const TextToSpeech: React.FC<TextToSpeechProps> = ({
     }
   }, [isPlaying, isPaused, onPlayingChange]);
 
-  // Generate speech using OpenAI TTS API
-  const generateSpeech = async () => {
+  // Generate speech using OpenAI TTS API - wrap in useCallback
+  const generateSpeech = useCallback(async () => {
     if (!text || isLoading) return;
     
     try {
@@ -106,7 +106,7 @@ const TextToSpeech: React.FC<TextToSpeechProps> = ({
       console.error('Error generating speech:', error);
       setIsLoading(false);
     }
-  };
+  }, [text, isLoading, audioUrl, autoPlay]);
 
   // Play audio
   const playAudio = () => {

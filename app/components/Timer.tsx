@@ -10,12 +10,11 @@ interface TimerProps {
 
 const Timer: React.FC<TimerProps> = ({ initialSeconds, onComplete }) => {
   const [remainingSeconds, setRemainingSeconds] = useState(initialSeconds);
-  const [isRunning, setIsRunning] = useState(true);
   const [isWarning, setIsWarning] = useState(false);
   
   useEffect(() => {
-    if (!isRunning || remainingSeconds <= 0) {
-      if (remainingSeconds <= 0 && onComplete) {
+    if (remainingSeconds <= 0) {
+      if (onComplete) {
         onComplete();
       }
       return;
@@ -31,7 +30,7 @@ const Timer: React.FC<TimerProps> = ({ initialSeconds, onComplete }) => {
     }, 1000);
     
     return () => clearTimeout(timerId);
-  }, [remainingSeconds, isRunning, onComplete, isWarning]);
+  }, [remainingSeconds, onComplete, isWarning]);
   
   // Format time as mm:ss
   const formatTime = () => {

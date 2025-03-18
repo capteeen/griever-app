@@ -28,7 +28,7 @@ const StoryRating: React.FC<StoryRatingProps> = ({ rating }) => {
       <h2 className="text-[#00ff00] font-mono text-xl mb-4 text-center">AI EVALUATION</h2>
       
       <div className="mb-4 text-center">
-        <p className="text-white/80 text-sm italic">"{rating.storyExcerpt}..."</p>
+        <p className="text-white/80 text-sm italic">&quot;{rating.storyExcerpt}...&quot;</p>
       </div>
       
       <div className="grid grid-cols-2 gap-4 mb-6">

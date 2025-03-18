@@ -13,7 +13,7 @@ import ChatInput from '../components/StoryEditor';
 import AIGuardian from '../components/AIGuardian';
 import Timer from '../components/Timer';
 import StoryRating from '../components/StoryRating';
-import { StoryRating as StoryRatingType, UserSession } from '../lib/types';
+import { StoryRating as StoryRatingType } from '../lib/types';
 import { setupAudioContextUnlock } from '../lib/audioContext';
 
 export default function ConversationPage() {
@@ -27,7 +27,6 @@ export default function ConversationPage() {
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [timerActive, setTimerActive] = useState(true);
   const [sessionEnded, setSessionEnded] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('Anonymous User');
@@ -139,7 +138,6 @@ export default function ConversationPage() {
   
   // Handle timer expiration
   const handleTimerExpire = async () => {
-    setTimerActive(false);
     setSessionEnded(true);
     
     // Get all user messages concatenated for rating
@@ -291,30 +289,6 @@ export default function ConversationPage() {
   // Handle return to home page with leaderboard
   const handleReturnHome = () => {
     router.push('/?showLeaderboard=true');
-  };
-  
-  // Submit rating to leaderboard
-  const submitToLeaderboard = async (rating: StoryRatingType) => {
-    try {
-      const response = await fetch('/api/leaderboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(rating),
-      });
-      
-      if (response.ok) {
-        console.log('Rating submitted to leaderboard successfully');
-      } else {
-        console.error('Failed to submit to leaderboard');
-      }
-      
-      return response.ok;
-    } catch (error) {
-      console.error('Error submitting to leaderboard:', error);
-      return false;
-    }
   };
   
   return (
