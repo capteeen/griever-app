@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import MatrixRain from './components/MatrixRain';
@@ -9,7 +9,8 @@ import FuturisticButton from './components/FuturisticButton';
 import TokenInfo from './components/TokenInfo';
 import Leaderboard from './components/Leaderboard';
 
-export default function Home() {
+// Create a component that uses searchParams
+function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -104,5 +105,24 @@ export default function Home() {
         </p>
       </main>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function HomeLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="w-8 h-8 border-2 border-[#00ff00]/50 border-t-[#00ff00] rounded-full animate-spin mx-auto mb-2"></div>
+      <span className="text-[#00ff00]/70 ml-3">Loading...</span>
+    </div>
+  );
+}
+
+// Main Home component with Suspense
+export default function Home() {
+  return (
+    <Suspense fallback={<HomeLoading />}>
+      <HomeContent />
+    </Suspense>
   );
 }

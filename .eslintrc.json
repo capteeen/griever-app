@@ -9,5 +9,10 @@
     }],
     "@typescript-eslint/no-explicit-any": "warn",
     "react-hooks/exhaustive-deps": "warn"
-  }
+  },
+  "ignorePatterns": [
+    "*.config.js",
+    ".next",
+    "node_modules"
+  ]
 } 

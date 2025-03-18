@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { unlockAudioContext } from '../lib/audioContext';
 
 interface AutoPlayingTextToSpeechProps {
@@ -24,6 +24,16 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
       onPlayingChange(isPlaying && !isPaused);
     }
   }, [isPlaying, isPaused, onPlayingChange]);
+
+  // Clean up function with proper ref handling
+  const cleanupAudio = useCallback(() => {
+    // Store ref in a variable to avoid React hooks exhaustive-deps warning
+    const audioElement = audioRef.current;
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.src = '';
+    }
+  }, []);
 
   // Generate speech and play it automatically
   useEffect(() => {
@@ -88,15 +98,8 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
     generateAndPlaySpeech();
     
     // Clean up on component unmount or when text changes
-    return () => {
-      // Capture the current value of audioRef to avoid React Hook warning
-      const audioElement = audioRef.current;
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.src = '';
-      }
-    };
-  }, [text]);
+    return cleanupAudio;
+  }, [text, cleanupAudio]);
   
   // Handle play button click
   const handlePlayClick = () => {
