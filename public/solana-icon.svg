@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <!-- Simplified Solana Logo -->
+  <linearGradient id="solana-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#00ff00" />
+    <stop offset="100%" stop-color="#00aa00" />
+  </linearGradient>
+  
+  <!-- Main Shape -->
+  <path d="M5 15.5L8 19H25L22 15.5H5Z" fill="url(#solana-gradient)" />
+  <path d="M5 9.5L8 13H25L22 9.5H5Z" fill="url(#solana-gradient)" />
+  <path d="M5 21.5L8 25H25L22 21.5H5Z" fill="url(#solana-gradient)" />
+</svg> 
