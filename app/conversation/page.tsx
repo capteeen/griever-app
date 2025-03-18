@@ -15,6 +15,7 @@ import Timer from '../components/Timer';
 import StoryRating from '../components/StoryRating';
 import { StoryRating as StoryRatingType } from '../lib/types';
 import { setupAudioContextUnlock } from '../lib/audioContext';
+import AutoPlayingTextToSpeech from '../components/AutoPlayingTextToSpeech';
 
 export default function ConversationPage() {
   const router = useRouter();
@@ -367,6 +368,7 @@ export default function ConversationPage() {
                 key={index} 
                 message={message} 
                 onSpeakingChange={handleSpeakingChange}
+                index={index}
               />
             ))}
             <div ref={messagesEndRef} />

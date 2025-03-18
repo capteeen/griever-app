@@ -6,15 +6,18 @@ import { unlockAudioContext } from '../lib/audioContext';
 interface AutoPlayingTextToSpeechProps {
   text: string;
   onPlayingChange?: (isPlaying: boolean) => void;
+  autoplay?: boolean;
 }
 
 const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({ 
   text, 
-  onPlayingChange
+  onPlayingChange,
+  autoplay = false
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAudioReady, setIsAudioReady] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -36,12 +39,14 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
     }
   }, []);
 
-  // Generate speech and play it automatically
+  // Generate speech but don't auto-play it, just prepare it
   useEffect(() => {
     if (!text) return;
     
     setErrorMessage(null);
-    const generateAndPlaySpeech = async () => {
+    setIsAudioReady(false);
+    
+    const generateSpeech = async () => {
       try {
         setIsLoading(true);
         
@@ -76,26 +81,25 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
           // Set the audio source to the blob URL
           audioRef.current.src = audioUrl;
           
-          // Ensure audio element is set up for autoplay
-          audioRef.current.autoplay = true;
+          // Configure audio element but don't autoplay yet
+          audioRef.current.autoplay = false; // We'll control this manually
           audioRef.current.muted = false;
           audioRef.current.setAttribute('playsinline', '');
           
           // Preload audio
           audioRef.current.load();
           
-          // Try to play the audio
-          try {
-            await audioRef.current.play();
-          } catch (playError) {
-            console.warn('Autoplay prevented by browser:', playError);
-            
-            // If autoplay fails, programmatically click the play button
-            setTimeout(() => {
-              if (buttonRef.current) {
-                buttonRef.current.click();
-              }
-            }, 100);
+          setIsAudioReady(true);
+          
+          // Only try autoplay if specified and not the first text
+          if (autoplay) {
+            try {
+              await audioRef.current.play();
+            } catch (playError) {
+              console.warn('Autoplay prevented by browser:', playError);
+              // Don't try to automatically click the button
+              // Let user click manually for first interaction
+            }
           }
         }
         
@@ -107,7 +111,7 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
       }
     };
     
-    generateAndPlaySpeech();
+    generateSpeech();
     
     // Clean up on component unmount or when text changes
     return () => {
@@ -117,7 +121,7 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
         URL.revokeObjectURL(audioRef.current.src);
       }
     };
-  }, [text, cleanupAudio]);
+  }, [text, cleanupAudio, autoplay]);
   
   // Handle play button click
   const handlePlayClick = () => {
@@ -152,13 +156,13 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
       <button
         ref={buttonRef}
         onClick={handlePlayClick}
-        disabled={isLoading || !text}
+        disabled={isLoading || !text || !isAudioReady}
         className={`p-2 rounded-full ${
-          isLoading
+          isLoading || !isAudioReady
             ? 'bg-[#00ff00]/20 text-[#00ff00]/50'
             : 'bg-[#00ff00]/30 text-[#00ff00] hover:bg-[#00ff00]/40'
-        } transition-colors`}
-        title={isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Play'}
+        } transition-colors ${!isAudioReady && !isLoading ? 'animate-pulse' : ''}`}
+        title={isPlaying ? (isPaused ? 'Resume' : 'Pause') : (isAudioReady ? 'Play' : 'Preparing audio...')}
       >
         {isLoading ? (
           <div className="w-5 h-5 border-2 border-[#00ff00]/50 border-t-[#00ff00] rounded-full animate-spin" />
@@ -188,9 +192,10 @@ const AutoPlayingTextToSpeech: React.FC<AutoPlayingTextToSpeechProps> = ({
       )}
       
       <span className="text-xs text-[#00ff00]/70">
-        {isLoading ? 'Generating voice...' : errorMessage ? 
-          <span className="text-red-400">{errorMessage}</span> : 
-          isPlaying ? (isPaused ? 'Paused' : 'Speaking...') : 'AI Voice'}
+        {isLoading ? 'Generating voice...' : 
+         errorMessage ? <span className="text-red-400">{errorMessage}</span> : 
+         !isAudioReady ? 'Preparing audio...' :
+         isPlaying ? (isPaused ? 'Paused' : 'Speaking...') : 'Click to play AI voice'}
       </span>
       
       {/* The actual audio element */}

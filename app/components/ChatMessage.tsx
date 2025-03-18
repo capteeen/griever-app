@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import AutoPlayingTextToSpeech from './AutoPlayingTextToSpeech';
 
@@ -12,13 +12,16 @@ export interface Message {
 interface ChatMessageProps {
   message: Message;
   onSpeakingChange?: (speaking: boolean) => void;
+  index?: number; // Add index prop to know message position
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ 
   message, 
-  onSpeakingChange 
+  onSpeakingChange,
+  index = 0, // Default to 0 (first message)
 }) => {
   const isAI = message.role === 'assistant';
+  const isFirstAIMessage = isAI && index === 0;
   
   // Handle speech state changes from the TextToSpeech component
   const handleSpeechStateChange = (isPlaying: boolean) => {
@@ -54,6 +57,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             <AutoPlayingTextToSpeech 
               text={message.content} 
               onPlayingChange={handleSpeechStateChange}
+              autoplay={!isFirstAIMessage} // Only autoplay for non-first messages
             />
           )}
         </div>
